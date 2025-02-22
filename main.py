@@ -6,14 +6,17 @@ import time
 import io
 import pandas as pd
 
-# Download necessary NLTK resources
-nltk.download('vader_lexicon')
-nltk.download('punkt')
+# Download necessary NLTK resources quietly
+nltk.download('vader_lexicon', quiet=True)
+nltk.download('punkt', quiet=True)
 
-# Cache the analysis function for performance
+# Instantiate the SentimentIntensityAnalyzer globally so it isn’t cached
+sia = SentimentIntensityAnalyzer()
+
+# Cache the analysis function for performance (avoid instantiating non-pickleable objects here)
 @st.cache_data
 def analyze_sentiment(text):
-    sia = SentimentIntensityAnalyzer()
+    # Tokenize sentences using NLTK's Punkt tokenizer
     sentences = nltk.sent_tokenize(text)
     pos_sentences = []
     neg_sentences = []
@@ -176,10 +179,7 @@ if analysis_mode == "Single Analysis":
             # Detailed Sentence Analysis Table with Filter Option
             st.subheader("Detailed Sentence Analysis")
             filter_option = st.selectbox("Filter by Classification", ["All", "Positive", "Negative", "Neutral"])
-            if filter_option != "All":
-                df_filtered = df[df["Classification"] == filter_option]
-            else:
-                df_filtered = df
+            df_filtered = df if filter_option == "All" else df[df["Classification"] == filter_option]
             st.dataframe(df_filtered)
             
             # Inline Highlighted Text Display
@@ -307,3 +307,4 @@ else:
             st.download_button(label="📥 Download TXT Report", data=report_file, file_name="comparison_sentiment_analysis.txt", mime="text/plain")
         else:
             st.warning("⚠️ Please enter text for both Text A and Text B.")
+
