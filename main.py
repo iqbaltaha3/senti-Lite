@@ -9,11 +9,11 @@ import pandas as pd
 # Download necessary NLTK resources quietly
 nltk.download('vader_lexicon', quiet=True)
 nltk.download('punkt', quiet=True)
+nltk.download('punkt_tab', quiet=True)  # Added to ensure punkt_tab is available
 
 # Instantiate the SentimentIntensityAnalyzer globally so it isn’t cached
 sia = SentimentIntensityAnalyzer()
 
-# Cache the analysis function for performance (avoid instantiating non-pickleable objects here)
 @st.cache_data
 def analyze_sentiment(text):
     # Tokenize sentences using NLTK's Punkt tokenizer
@@ -59,7 +59,6 @@ def analyze_sentiment(text):
         "sentence_data": sentence_data
     }
 
-# Function to produce inline highlighted text with HTML formatting
 def highlight_text(sentence_data):
     highlighted = ""
     for data in sentence_data:
@@ -74,7 +73,6 @@ def highlight_text(sentence_data):
         highlighted += f'<span style="background-color: {color}; padding: 3px; margin:2px; border-radius: 3px;">{sentence}</span> '
     return highlighted
 
-# Sidebar: Navigation, About, and Mode Selection
 st.sidebar.title("SparrowSentiment")
 app_mode = st.sidebar.selectbox("Navigation", ["Sentiment Analysis", "About"])
 
@@ -95,7 +93,6 @@ if app_mode == "About":
 st.title("🕊 SparrowSentiment: Comprehensive Sentiment Analysis")
 st.markdown("Analyze the sentiment of your text with AI-powered insights!")
 
-# Analysis Mode: Single vs. Comparison
 analysis_mode = st.sidebar.radio("Analysis Mode", ["Single Analysis", "Comparison Analysis"])
 
 #############################
@@ -103,8 +100,6 @@ analysis_mode = st.sidebar.radio("Analysis Mode", ["Single Analysis", "Compariso
 #############################
 if analysis_mode == "Single Analysis":
     st.subheader("Single Text Analysis")
-    
-    # Input Options: Text Input or File Upload
     input_method = st.sidebar.radio("Input Method", ("Text Input", "File Upload"))
     sample_text = (
         "I love this product! It has changed my life. However, the shipping was delayed and the packaging was terrible. "
@@ -130,7 +125,6 @@ if analysis_mode == "Single Analysis":
                 pos_sentences = result["pos_sentences"]
                 neg_sentences = result["neg_sentences"]
                 
-                # Count classifications
                 total_sentences = len(sentence_data)
                 count_positive = len(pos_sentences)
                 count_negative = len(neg_sentences)
@@ -139,14 +133,12 @@ if analysis_mode == "Single Analysis":
                 sentiment = "Positive" if overall_score >= 0.05 else "Negative" if overall_score <= -0.05 else "Neutral"
                 st.success(f"Overall Sentiment: **{sentiment}** (Score: {overall_score:.2f})")
             
-            # Summary Statistics
             st.subheader("Summary")
             st.markdown(f"**Total Sentences:** {total_sentences}")
             st.markdown(f"**Positive Sentences:** {count_positive}")
             st.markdown(f"**Negative Sentences:** {count_negative}")
             st.markdown(f"**Neutral Sentences:** {count_neutral}")
             
-            # Pie Chart for Sentiment Breakdown
             st.subheader("Sentiment Breakdown")
             fig1, ax1 = plt.subplots()
             labels = ['Positive', 'Negative', 'Neutral']
@@ -156,7 +148,6 @@ if analysis_mode == "Single Analysis":
             ax1.axis('equal')
             st.pyplot(fig1)
             
-            # Bar Chart: Sentence-level Compound Scores
             st.subheader("Sentence Sentiment Scores")
             df = pd.DataFrame(sentence_data)
             fig2, ax2 = plt.subplots(figsize=(10, 4))
@@ -167,7 +158,6 @@ if analysis_mode == "Single Analysis":
             ax2.set_title("Compound Sentiment Scores per Sentence")
             st.pyplot(fig2)
             
-            # Histogram: Distribution of Compound Scores
             st.subheader("Sentiment Distribution")
             fig3, ax3 = plt.subplots(figsize=(8, 4))
             ax3.hist(df["Compound Score"], bins=10, color='skyblue', edgecolor='black')
@@ -176,18 +166,15 @@ if analysis_mode == "Single Analysis":
             ax3.set_title("Distribution of Sentence Compound Scores")
             st.pyplot(fig3)
             
-            # Detailed Sentence Analysis Table with Filter Option
             st.subheader("Detailed Sentence Analysis")
             filter_option = st.selectbox("Filter by Classification", ["All", "Positive", "Negative", "Neutral"])
             df_filtered = df if filter_option == "All" else df[df["Classification"] == filter_option]
             st.dataframe(df_filtered)
             
-            # Inline Highlighted Text Display
             st.subheader("Text with Sentiment Highlights")
             highlighted_html = highlight_text(sentence_data)
             st.markdown(highlighted_html, unsafe_allow_html=True)
             
-            # Downloadable Report (TXT & CSV)
             st.subheader("Download Analysis Report")
             report_content = f"Overall Sentiment: {sentiment} (Score: {overall_score:.2f})\n\n"
             report_content += "Sentiment Breakdown:\n"
@@ -232,7 +219,6 @@ else:
                 result_a = analyze_sentiment(text_a)
                 result_b = analyze_sentiment(text_b)
                 
-                # Summary for Text A
                 overall_a = result_a["overall"]
                 sentiment_a = "Positive" if overall_a >= 0.05 else "Negative" if overall_a <= -0.05 else "Neutral"
                 df_a = pd.DataFrame(result_a["sentence_data"])
@@ -241,7 +227,6 @@ else:
                 neg_a = len(result_a["neg_sentences"])
                 neu_a = total_a - pos_a - neg_a
                 
-                # Summary for Text B
                 overall_b = result_b["overall"]
                 sentiment_b = "Positive" if overall_b >= 0.05 else "Negative" if overall_b <= -0.05 else "Neutral"
                 df_b = pd.DataFrame(result_b["sentence_data"])
@@ -252,7 +237,6 @@ else:
                 
                 st.success("Analysis Completed!")
             
-            # Display side-by-side summary
             st.markdown("### Overall Summary")
             summary_df = pd.DataFrame({
                 "": ["Overall Score", "Sentiment", "Total Sentences", "Positive", "Negative", "Neutral"],
@@ -261,7 +245,6 @@ else:
             })
             st.dataframe(summary_df)
             
-            # Comparative Bar Chart for Overall Compound Scores
             st.subheader("Comparative Overall Sentiment")
             fig_comp, ax_comp = plt.subplots()
             texts = ["Text A", "Text B"]
@@ -271,7 +254,6 @@ else:
             ax_comp.set_ylabel("Overall Compound Score")
             st.pyplot(fig_comp)
             
-            # Detailed Sentence Analysis: Option to filter for each text
             st.markdown("### Detailed Sentence Analysis for Text A")
             filter_option_a = st.selectbox("Filter Text A", ["All", "Positive", "Negative", "Neutral"], key="filter_a")
             df_a_filtered = df_a if filter_option_a == "All" else df_a[df_a["Classification"] == filter_option_a]
@@ -282,14 +264,12 @@ else:
             df_b_filtered = df_b if filter_option_b == "All" else df_b[df_b["Classification"] == filter_option_b]
             st.dataframe(df_b_filtered)
             
-            # Inline Highlighted Text for both texts
             st.markdown("### Text with Sentiment Highlights")
             st.markdown("**Text A:**")
             st.markdown(highlight_text(result_a["sentence_data"]), unsafe_allow_html=True)
             st.markdown("**Text B:**")
             st.markdown(highlight_text(result_b["sentence_data"]), unsafe_allow_html=True)
             
-            # Downloadable Combined Report
             st.subheader("Download Combined Analysis Report")
             report_content = "=== Text A Analysis ===\n"
             report_content += f"Overall Sentiment: {sentiment_a} (Score: {overall_a:.2f})\n"
@@ -307,4 +287,5 @@ else:
             st.download_button(label="📥 Download TXT Report", data=report_file, file_name="comparison_sentiment_analysis.txt", mime="text/plain")
         else:
             st.warning("⚠️ Please enter text for both Text A and Text B.")
+
 
