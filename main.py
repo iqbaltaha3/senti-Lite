@@ -73,11 +73,11 @@ def highlight_text(sentence_data):
         highlighted += f'<span style="background-color: {color}; padding: 3px; margin:2px; border-radius: 3px;">{sentence}</span> '
     return highlighted
 
-st.sidebar.title("SparrowSentiment")
+st.sidebar.title("senti-Lite")
 app_mode = st.sidebar.selectbox("Navigation", ["Sentiment Analysis", "About"])
 
 if app_mode == "About":
-    st.title("About SparrowSentiment")
+    st.title("senti-Lite")
     st.markdown("""
         **SparrowSentiment** is an AI-powered sentiment analysis tool that lets you dive deep into the emotional tone of your text.
         
@@ -90,7 +90,7 @@ if app_mode == "About":
     """)
     st.stop()
 
-st.title("🕊 SparrowSentiment: Comprehensive Sentiment Analysis")
+st.title("🕊 senti-Lite: Comprehensive Sentiment Analysis")
 st.markdown("Analyze the sentiment of your text with AI-powered insights!")
 
 analysis_mode = st.sidebar.radio("Analysis Mode", ["Single Analysis", "Comparison Analysis"])
