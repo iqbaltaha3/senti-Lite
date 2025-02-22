@@ -3,4 +3,3 @@ pandas
 textblob
 matplotlib
 wordcloud
-punkt
